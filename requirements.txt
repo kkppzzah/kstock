@@ -4,3 +4,5 @@ pandas
 pytest
 pytest-cov
 environ-config
+twine
+wheel
