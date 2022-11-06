@@ -43,7 +43,7 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            'cli-name = mypkg.mymodule:some_func',
+            'dump_tdx_candle_file = kstock.commands.dump_tdx_candle_file:main',
         ]
     }
 )
