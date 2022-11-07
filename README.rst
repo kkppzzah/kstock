@@ -33,11 +33,12 @@ API
 
         周期类型，d：日；M5：5分钟；M1：1分钟。
 
+        * 读取整个K线文件
         .. code-block:: python
 
             >>> from kstock.tdx.candle_loader import load_candle_day
             >>> from kstock.tdx import utils
-            >>> candle_file_path = utils.stock_candle_file_path('3001389', 'd', vipdoc_root_path='D:\\海王星金融终端-中国银河证券\\vipdoc')
+            >>> candle_file_path = utils.stock_candle_file_path('301389', 'd', vipdoc_root_path='D:\\海王星金融终端-中国银河证券\\vipdoc')
             >>> candle_file_path
             'D:\\海王星金融终端-中国银河证券\\vipdoc\\sz\\lday\\sz301389.day'
             >>> candles = load_candle_day(candle_file_path)
@@ -50,6 +51,20 @@ API
             2022-11-03 2022-11-03  20.00  20.50  19.63  20.33  213598800.0  10662210
             2022-11-04 2022-11-04  20.40  20.66  20.12  20.33  221527104.0  10869630
 
+        * 读取最新K线
+        .. code-block:: python
+
+            >>> from kstock.tdx.candle_loader import load_candle_day_latest
+            >>> from kstock.tdx import utils
+            >>> candle_file_path = utils.stock_candle_file_path('301389', 'd', vipdoc_root_path='D:\\海王星金融终端-中国银河证券\\vipdoc')
+            >>> candle_file_path
+            'D:\\海王星金融终端-中国银河证券\\vipdoc\\sz\\lday\\sz301389.day'
+            >>> candles = load_candle_day_latest(candle_file_path, count=2)
+            >>> candles
+                             time  open   high    low  close       amount    volume
+            time
+            2022-11-04 2022-11-04  20.4  20.66  20.12  20.33  221527104.0  10869630
+            2022-11-07 2022-11-07  20.0  20.94  19.93  20.78  242494960.0  11794843
 
     * 自定义板块读写
 

@@ -21,3 +21,5 @@ stock_code_tdx_file_map = [
         'prefix': '3', 'path': 'sz', 'filename_format': 'sz{code}.{suffix}'
     }
 ]
+
+CANDLE_ITEM_LEN = 32  # 每个K线长度是32个字节。
