@@ -1,4 +1,6 @@
 # -*- coding:utf-8 -*-
+import datetime
+
 import pandas as pd
 
 from kstock.common.consts import AggregateTimeType
@@ -16,6 +18,13 @@ day_to_month_time_func_map = {
     AggregateTimeType.LAST_DATA_TIME: 'last',
     AggregateTimeType.PERIOD_START_TIME: lambda s: datetime_utils.get_month_first_day(s.iloc[0]),
     AggregateTimeType.PERIOD_END_TIME: lambda s: datetime_utils.get_month_last_day(s.iloc[0])
+}
+
+m5_to_m30_time_func_map = {
+    AggregateTimeType.FIRST_DATA_TIME: 'first',
+    AggregateTimeType.LAST_DATA_TIME: 'last',
+    AggregateTimeType.PERIOD_START_TIME: lambda s: datetime_utils.get_m30_first_m5(s.iloc[0]),
+    AggregateTimeType.PERIOD_END_TIME: lambda s: datetime_utils.get_m30_last_m5(s.iloc[0])
 }
 
 
@@ -66,3 +75,54 @@ def aggregate_candles_day_to_month(
     :return:
     """
     return aggregate_candles_day(candles, 'M', day_to_month_time_func_map, aggregate_time_type=aggregate_time_type)
+
+
+def aggregate_candles_minute(
+        candles: pd.DataFrame,
+        time_func_map: dict,
+        aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+
+    :param candles:
+    :param time_func_map:
+    :param aggregate_time_type:
+    :return:
+    """
+    result_candles = candles.groupby('key').agg({
+        'time': time_func_map[aggregate_time_type],
+        'open': 'first',
+        'high': 'max',
+        'low': 'min',
+        'close': 'last',
+        'volume': 'sum',
+        'amount': 'sum',
+    })
+    return result_candles.set_index('time', drop=False)
+
+
+def aggregate_candles_m5_to_m30(
+        candles: pd.DataFrame, aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+    聚合5分钟K线到30分钟K线。
+    :param candles:
+    :param aggregate_time_type:
+    :return:
+    """
+    candles = candles.reset_index(inplace=False, drop=True)
+    temp = pd.DatetimeIndex(candles['time'] - datetime.timedelta(minutes=5)).dropna().to_series()
+    candles['key'] = (temp - pd.TimedeltaIndex(temp.dt.minute % 30, unit='min')).reset_index(drop=True)
+    return aggregate_candles_minute(candles, m5_to_m30_time_func_map, aggregate_time_type=aggregate_time_type)
+
+
+def aggregate_candles_m5_to_h1(
+        candles: pd.DataFrame, aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+    聚合5分钟K线到1小时K线。
+    :param candles:
+    :param aggregate_time_type:
+    :return:
+    """
+    pass
