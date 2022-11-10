@@ -182,3 +182,38 @@ def aggregate_candles_day_to_month_hard(
         result_candle['amount'] = result_candle['amount'] + candle['amount']
     result_candles = pd.DataFrame(sorted(result_candles.values(), key=lambda c: c['time']))
     return result_candles.set_index('time', drop=False)
+
+
+def aggregate_candles_m5_to_m30_hard(
+    candles: pd.DataFrame, aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+
+    :param candles:
+    :param aggregate_time_type:
+    :return:
+    """
+    result_candles = {}
+    for i in range(candles.shape[0]):
+        candle: pd.Series = candles.iloc[i]
+        ts: pd.Timestamp = candle['time']
+        m30_first_m5 = datetime_utils.get_m30_first_m5(ts)
+
+        result_candle = result_candles.get(m30_first_m5)
+        if result_candle is None:
+            result_candle = candle.copy()
+            if aggregate_time_type == AggregateTimeType.PERIOD_START_TIME:
+                result_candle['time'] = m30_first_m5
+            elif aggregate_time_type == AggregateTimeType.PERIOD_END_TIME:
+                result_candle['time'] = datetime_utils.get_m30_last_m5(ts)
+            result_candles[m30_first_m5] = result_candle
+            continue
+        if aggregate_time_type == AggregateTimeType.LAST_DATA_TIME:
+            result_candle['time'] = candle['time']
+        result_candle['high'] = max(result_candle['high'], candle['high'])
+        result_candle['low'] = min(result_candle['low'], candle['low'])
+        result_candle['close'] = candle['close']
+        result_candle['volume'] = result_candle['volume'] + candle['volume']
+        result_candle['amount'] = result_candle['amount'] + candle['amount']
+    result_candles = pd.DataFrame(sorted(result_candles.values(), key=lambda c: c['time']))
+    return result_candles.set_index('time', drop=False)
