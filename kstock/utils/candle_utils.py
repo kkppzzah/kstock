@@ -41,6 +41,15 @@ day_to_quarter_time_func_map = {
     AggregateTimeType.PERIOD_END_TIME: lambda s: datetime_utils.get_quarter_last_day(s.iloc[0])
 }
 
+
+day_to_year_time_func_map = {
+    AggregateTimeType.FIRST_DATA_TIME: 'first',
+    AggregateTimeType.LAST_DATA_TIME: 'last',
+    AggregateTimeType.PERIOD_START_TIME: lambda s: datetime_utils.get_year_first_day(s.iloc[0]),
+    AggregateTimeType.PERIOD_END_TIME: lambda s: datetime_utils.get_year_last_day(s.iloc[0])
+}
+
+
 def aggregate_candles_day(
         candles: pd.DataFrame,
         rule: str, time_func_map: dict,
@@ -151,9 +160,21 @@ def aggregate_candles_day_to_quarter(
         candles: pd.DataFrame, aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
 ) -> pd.DataFrame:
     """
-    聚合日K线到周K线。
+    聚合日K线到季K线。
     :param candles:
     :param aggregate_time_type:
     :return:
     """
     return aggregate_candles_day(candles, 'Q', day_to_quarter_time_func_map, aggregate_time_type=aggregate_time_type)
+
+
+def aggregate_candles_day_to_year(
+        candles: pd.DataFrame, aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+    聚合日K线到年K线。
+    :param candles:
+    :param aggregate_time_type:
+    :return:
+    """
+    return aggregate_candles_day(candles, 'Y', day_to_year_time_func_map, aggregate_time_type=aggregate_time_type)
