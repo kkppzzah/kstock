@@ -66,3 +66,35 @@ def get_m30_last_m5(time: datetime.datetime) -> datetime.datetime:
         return datetime.datetime(time.year, time.month, time.day, hour=time.hour) + datetime.timedelta(hours=1)
     else:
         return datetime.datetime(time.year, time.month, time.day, hour=time.hour, minute=30)
+
+
+def get_h1_first_m5(time: datetime.datetime) -> datetime.datetime:
+    """
+    获取1小时K线对应的第一个5分钟K线时间。
+    :param time:
+    :return:
+    """
+    if time.hour == 9 or (time.hour == 10 and time.minute < 35):
+        return datetime.datetime(time.year, time.month, time.day, hour=9, minute=35)
+    elif time.hour == 10 or time.hour == 11:
+        return datetime.datetime(time.year, time.month, time.day, hour=10, minute=35)
+    elif time.hour == 13 or (time.hour == 14 and time.minute == 0):
+        return datetime.datetime(time.year, time.month, time.day, hour=13, minute=5)
+    else:
+        return datetime.datetime(time.year, time.month, time.day, hour=14, minute=5)
+
+
+def get_h1_last_m5(time: datetime.datetime) -> datetime.datetime:
+    """
+    获取1小时K线对应的最后一个5分钟K线时间。
+    :param time:
+    :return:
+    """
+    if time.hour == 9 or (time.hour == 10 and time.minute < 35):
+        return datetime.datetime(time.year, time.month, time.day, hour=10, minute=30)
+    elif time.hour == 10 or time.hour == 11:
+        return datetime.datetime(time.year, time.month, time.day, hour=11, minute=30)
+    elif time.hour == 13 or (time.hour == 14 and time.minute == 0):
+        return datetime.datetime(time.year, time.month, time.day, hour=14, minute=0)
+    else:
+        return datetime.datetime(time.year, time.month, time.day, hour=15)

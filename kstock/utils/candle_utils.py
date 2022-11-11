@@ -27,6 +27,13 @@ m5_to_m30_time_func_map = {
     AggregateTimeType.PERIOD_END_TIME: lambda s: datetime_utils.get_m30_last_m5(s.iloc[0])
 }
 
+m5_to_h1_time_func_map = {
+    AggregateTimeType.FIRST_DATA_TIME: 'first',
+    AggregateTimeType.LAST_DATA_TIME: 'last',
+    AggregateTimeType.PERIOD_START_TIME: lambda s: datetime_utils.get_h1_first_m5(s.iloc[0]),
+    AggregateTimeType.PERIOD_END_TIME: lambda s: datetime_utils.get_h1_last_m5(s.iloc[0])
+}
+
 
 def aggregate_candles_day(
         candles: pd.DataFrame,
@@ -125,4 +132,10 @@ def aggregate_candles_m5_to_h1(
     :param aggregate_time_type:
     :return:
     """
-    pass
+    candles = candles.reset_index(inplace=False, drop=True)
+    temp = pd.DatetimeIndex(candles['time'] - datetime.timedelta(minutes=5)).dropna().to_series()
+    temp[(temp.dt.hour == 10) & (temp.dt.minute < 30)] = temp - pd.Timedelta(1, unit='h')
+    temp[temp.dt.hour == 11] = temp - pd.Timedelta(1, unit='h')
+    temp = (temp - pd.TimedeltaIndex(temp.dt.minute, unit='min')).reset_index(drop=True)
+    candles['key'] = temp
+    return aggregate_candles_minute(candles, m5_to_h1_time_func_map, aggregate_time_type=aggregate_time_type)
