@@ -251,5 +251,101 @@ def aggregate_candles_m5_to_h1_hard(
         result_candle['volume'] = result_candle['volume'] + candle['volume']
         result_candle['amount'] = result_candle['amount'] + candle['amount']
     result_candles = pd.DataFrame(sorted(result_candles.values(), key=lambda c: c['time']))
-    print('================> 0', result_candles.set_index('time', drop=False))
     return result_candles.set_index('time', drop=False)
+
+
+def aggregate_candles_day_to_quarter_hard(
+    candles: pd.DataFrame, aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+
+    :param candles:
+    :param aggregate_time_type:
+    :return:
+    """
+    result_candles = {}
+    for i in range(candles.shape[0]):
+        candle: pd.Series = candles.iloc[i]
+        ts: pd.Timestamp = candle['time']
+        quarter_first_day = datetime_utils.get_quarter_first_day(ts)
+        result_candle = result_candles.get(quarter_first_day)
+        if result_candle is None:
+            result_candle = candle.copy()
+            if aggregate_time_type == AggregateTimeType.PERIOD_START_TIME:
+                result_candle['time'] = quarter_first_day
+            elif aggregate_time_type == AggregateTimeType.PERIOD_END_TIME:
+                result_candle['time'] = datetime_utils.get_quarter_last_day(ts)
+            result_candles[quarter_first_day] = result_candle
+            continue
+        if aggregate_time_type == AggregateTimeType.LAST_DATA_TIME:
+            result_candle['time'] = candle['time']
+        result_candle['high'] = max(result_candle['high'], candle['high'])
+        result_candle['low'] = min(result_candle['low'], candle['low'])
+        result_candle['close'] = candle['close']
+        result_candle['volume'] = result_candle['volume'] + candle['volume']
+        result_candle['amount'] = result_candle['amount'] + candle['amount']
+    result_candles = pd.DataFrame(sorted(result_candles.values(), key=lambda c: c['time']))
+    return result_candles.set_index('time', drop=False)
+
+
+def aggregate_candles_day_to_year_hard(
+    candles: pd.DataFrame, aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+
+    :param candles:
+    :param aggregate_time_type:
+    :return:
+    """
+    result_candles = {}
+    for i in range(candles.shape[0]):
+        candle: pd.Series = candles.iloc[i]
+        ts: pd.Timestamp = candle['time']
+        year_first_day = datetime_utils.get_year_first_day(ts)
+        result_candle = result_candles.get(year_first_day)
+        if result_candle is None:
+            result_candle = candle.copy()
+            if aggregate_time_type == AggregateTimeType.PERIOD_START_TIME:
+                result_candle['time'] = year_first_day
+            elif aggregate_time_type == AggregateTimeType.PERIOD_END_TIME:
+                result_candle['time'] = datetime_utils.get_year_last_day(ts)
+            result_candles[year_first_day] = result_candle
+            continue
+        if aggregate_time_type == AggregateTimeType.LAST_DATA_TIME:
+            result_candle['time'] = candle['time']
+        result_candle['high'] = max(result_candle['high'], candle['high'])
+        result_candle['low'] = min(result_candle['low'], candle['low'])
+        result_candle['close'] = candle['close']
+        result_candle['volume'] = result_candle['volume'] + candle['volume']
+        result_candle['amount'] = result_candle['amount'] + candle['amount']
+    result_candles = pd.DataFrame(sorted(result_candles.values(), key=lambda c: c['time']))
+    return result_candles.set_index('time', drop=False)
+
+
+def aggregate_candles_n_hard(
+    candles: pd.DataFrame, group_size: int,
+    aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+
+    :param candles:
+    :param group_size:
+    :param aggregate_time_type:
+    :return:
+    """
+    candles = candles.reset_index(inplace=False, drop=True)
+    candles_count = candles.shape[0]
+    results = [
+        candles.iloc[index: index + group_size].agg({
+        'time': lambda x: x.iloc[0] if aggregate_time_type == AggregateTimeType.FIRST_DATA_TIME
+                    else x.iloc[x.shape[0] - 1],
+        'open': lambda x: x.iloc[0],
+        'high': 'max',
+        'low': 'min',
+        'close': lambda x: x.iloc[x.shape[0] - 1],
+        'volume': 'sum',
+        'amount': 'sum'
+    })
+        for index in range(0, candles_count, group_size)
+    ]
+    return pd.DataFrame(results).set_index('time', drop=False)

@@ -7,12 +7,14 @@ import pytest
 from kstock.common.consts import AggregateTimeType
 from kstock.utils.candle_utils import (
     aggregate_candles_day_to_week, aggregate_candles_day_to_month,
-    aggregate_candles_m5_to_m30, aggregate_candles_m5_to_h1
+    aggregate_candles_m5_to_m30, aggregate_candles_m5_to_h1, aggregate_candles_day_to_quarter,
+    aggregate_candles_day_to_year, aggregate_candles_n
 )
 from .test_utils import (
     data_path as dp, load_tdx_exported_candles_day,
     aggregate_candles_day_to_week_hard, aggregate_candles_day_to_month_hard, aggregate_candles_m5_to_m30_hard,
-    aggregate_candles_m5_to_h1_hard
+    aggregate_candles_m5_to_h1_hard, aggregate_candles_day_to_quarter_hard, aggregate_candles_day_to_year_hard,
+    aggregate_candles_n_hard
 )
 
 
@@ -155,3 +157,133 @@ def test_aggregate_candles_m5_to_h1(day_candles: pd.DataFrame, aggregate_time_ty
     assert result_candles.shape[0] == candles.shape[0]
     keys = ['time', 'open', 'high', 'low', 'close', 'volume']
     assert candles[keys].equals(result_candles[keys])
+
+
+@pytest.mark.parametrize(
+    "day_candles, aggregate_time_type", [
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            AggregateTimeType.FIRST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            AggregateTimeType.LAST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            AggregateTimeType.PERIOD_START_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            AggregateTimeType.PERIOD_END_TIME
+        ],
+    ]
+)
+def test_aggregate_candles_day_to_quarter(day_candles: pd.DataFrame, aggregate_time_type: AggregateTimeType) -> None:
+    """
+    测试聚合日K线到月K线。
+    :param day_candles: 日K线。
+    :param aggregate_time_type: 时间聚合类型。
+    :return:
+    """
+    result_candles: pd.DataFrame = aggregate_candles_day_to_quarter(day_candles, aggregate_time_type)
+    candles: pd.DataFrame = aggregate_candles_day_to_quarter_hard(day_candles, aggregate_time_type)
+    assert result_candles is not None and isinstance(result_candles, pd.DataFrame)
+    assert result_candles.shape[0] == candles.shape[0]
+    assert candles.equals(result_candles)
+
+
+@pytest.mark.parametrize(
+    "day_candles, aggregate_time_type", [
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            AggregateTimeType.FIRST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            AggregateTimeType.LAST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            AggregateTimeType.PERIOD_START_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            AggregateTimeType.PERIOD_END_TIME
+        ],
+    ]
+)
+def test_aggregate_candles_day_to_year(day_candles: pd.DataFrame, aggregate_time_type: AggregateTimeType) -> None:
+    """
+    测试聚合日K线到月K线。
+    :param day_candles: 日K线。
+    :param aggregate_time_type: 时间聚合类型。
+    :return:
+    """
+    result_candles: pd.DataFrame = aggregate_candles_day_to_year(day_candles, aggregate_time_type)
+    candles: pd.DataFrame = aggregate_candles_day_to_year_hard(day_candles, aggregate_time_type)
+    assert result_candles is not None and isinstance(result_candles, pd.DataFrame)
+    assert result_candles.shape[0] == candles.shape[0]
+    assert candles.equals(result_candles)
+
+
+@pytest.mark.parametrize(
+    "day_candles, group_size, aggregate_time_type", [
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            2,
+            AggregateTimeType.FIRST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            2,
+            AggregateTimeType.LAST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            3,
+            AggregateTimeType.FIRST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            3,
+            AggregateTimeType.LAST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            5,
+            AggregateTimeType.FIRST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            5,
+            AggregateTimeType.LAST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            1,
+            AggregateTimeType.FIRST_DATA_TIME
+        ],
+        [
+            load_tdx_exported_candles_day(dp('sz301380.day.tdx_exported_candles.01.txt'), names=candle_file_columns),
+            1,
+            AggregateTimeType.LAST_DATA_TIME
+        ],
+    ]
+)
+def test_aggregate_candles_n(
+        day_candles: pd.DataFrame, group_size: int, aggregate_time_type: AggregateTimeType
+) -> None:
+    """
+    测试聚合日K线到月K线。
+    :param day_candles: 日K线。
+    :param group_size:
+    :param aggregate_time_type: 时间聚合类型。
+    :return:
+    """
+    day_candles['amount'] = 0.0
+    result_candles: pd.DataFrame = aggregate_candles_n(day_candles, group_size, aggregate_time_type)
+    candles: pd.DataFrame = aggregate_candles_n_hard(day_candles, group_size, aggregate_time_type)
+    assert result_candles is not None and isinstance(result_candles, pd.DataFrame)
+    assert result_candles.shape[0] == candles.shape[0]
+    assert candles.equals(result_candles)
