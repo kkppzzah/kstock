@@ -18,7 +18,7 @@ setup(
     description='A股数据处理工具',
     long_description=long_description(),
     long_description_content_type='text/x-rst',
-    keywords='A股 通达信文件读取 数据处理',
+    keywords='A股 通达信文件读取 数据处理 K线聚合',
     author='kk',
     author_email='kkppzzah@gmail.com',
     packages=find_packages(
@@ -45,5 +45,6 @@ setup(
         'console_scripts': [
             'dump_tdx_candle_file = kstock.commands.dump_tdx_candle_file:main',
         ]
-    }
+    },
+    python_requires='>=3.8'
 )
