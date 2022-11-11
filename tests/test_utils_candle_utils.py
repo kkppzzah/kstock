@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from kstock.common.consts import AggregateTimeType
-from kstock.utils.candle_utils import (
+from kstock.candle.aggregator import (
     aggregate_candles_day_to_week, aggregate_candles_day_to_month,
     aggregate_candles_m5_to_m30, aggregate_candles_m5_to_h1, aggregate_candles_day_to_quarter,
     aggregate_candles_day_to_year, aggregate_candles_n
