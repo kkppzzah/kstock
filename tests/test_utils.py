@@ -320,3 +320,32 @@ def aggregate_candles_day_to_year_hard(
         result_candle['amount'] = result_candle['amount'] + candle['amount']
     result_candles = pd.DataFrame(sorted(result_candles.values(), key=lambda c: c['time']))
     return result_candles.set_index('time', drop=False)
+
+
+def aggregate_candles_n_hard(
+    candles: pd.DataFrame, group_size: int,
+    aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+
+    :param candles:
+    :param group_size:
+    :param aggregate_time_type:
+    :return:
+    """
+    candles = candles.reset_index(inplace=False, drop=True)
+    candles_count = candles.shape[0]
+    results = [
+        candles.iloc[index: index + group_size].agg({
+        'time': lambda x: x.iloc[0] if aggregate_time_type == AggregateTimeType.FIRST_DATA_TIME
+                    else x.iloc[x.shape[0] - 1],
+        'open': lambda x: x.iloc[0],
+        'high': 'max',
+        'low': 'min',
+        'close': lambda x: x.iloc[x.shape[0] - 1],
+        'volume': 'sum',
+        'amount': 'sum'
+    })
+        for index in range(0, candles_count, group_size)
+    ]
+    return pd.DataFrame(results).set_index('time', drop=False)
