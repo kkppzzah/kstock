@@ -98,3 +98,22 @@ def get_h1_last_m5(time: datetime.datetime) -> datetime.datetime:
         return datetime.datetime(time.year, time.month, time.day, hour=14, minute=0)
     else:
         return datetime.datetime(time.year, time.month, time.day, hour=15)
+
+
+def get_quarter_first_day(day: datetime.datetime) -> datetime.datetime:
+    """
+    获取日期对应月的第一天。
+    :param day:
+    :return:
+    """
+    return datetime.datetime(day.year, (int((day.month - 1)/3) * 3) + 1, 1)
+
+
+def get_quarter_last_day(day: datetime.datetime) -> datetime.datetime:
+    """
+    获取日期对应月的第一天。
+    :param day:
+    :return:
+    """
+    return datetime.datetime(day.year, int((day.month + 2) / 3) * 3, 31 if (day.month > 3 or day.month < 10) else 30)
+

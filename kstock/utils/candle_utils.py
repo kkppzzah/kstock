@@ -34,6 +34,12 @@ m5_to_h1_time_func_map = {
     AggregateTimeType.PERIOD_END_TIME: lambda s: datetime_utils.get_h1_last_m5(s.iloc[0])
 }
 
+day_to_quarter_time_func_map = {
+    AggregateTimeType.FIRST_DATA_TIME: 'first',
+    AggregateTimeType.LAST_DATA_TIME: 'last',
+    AggregateTimeType.PERIOD_START_TIME: lambda s: datetime_utils.get_quarter_first_day(s.iloc[0]),
+    AggregateTimeType.PERIOD_END_TIME: lambda s: datetime_utils.get_quarter_last_day(s.iloc[0])
+}
 
 def aggregate_candles_day(
         candles: pd.DataFrame,
@@ -139,3 +145,15 @@ def aggregate_candles_m5_to_h1(
     temp = (temp - pd.TimedeltaIndex(temp.dt.minute, unit='min')).reset_index(drop=True)
     candles['key'] = temp
     return aggregate_candles_minute(candles, m5_to_h1_time_func_map, aggregate_time_type=aggregate_time_type)
+
+
+def aggregate_candles_day_to_quarter(
+        candles: pd.DataFrame, aggregate_time_type: AggregateTimeType = AggregateTimeType.PERIOD_START_TIME
+) -> pd.DataFrame:
+    """
+    聚合日K线到周K线。
+    :param candles:
+    :param aggregate_time_type:
+    :return:
+    """
+    return aggregate_candles_day(candles, 'Q', day_to_quarter_time_func_map, aggregate_time_type=aggregate_time_type)
