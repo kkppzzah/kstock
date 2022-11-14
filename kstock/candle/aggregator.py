@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import datetime
 import itertools
+import sys
 from typing import Dict, Tuple
 
 import numba
@@ -242,6 +243,10 @@ def _aggregate_candles_n(
         'open', result_open, 'high', result_high, 'low', result_low, 'close', result_close,
         'volume', result_volume, 'amount', result_amount, 'time_index', result_time_index
     )
+
+
+if 'pytest' not in sys.modules:
+    _aggregate_candles_n = numba.jit(_aggregate_candles_n, nopython=True, cache=True)
 
 
 def aggregate_candles_n(
